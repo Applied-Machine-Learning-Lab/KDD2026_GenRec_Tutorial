@@ -1,16 +1,37 @@
-# Nerfies
+# KDD 2026 Tutorial — Generative Recommendation: Foundations and Frontiers
 
-This is the repository that contains source code for the [Nerfies website](https://nerfies.github.io).
+This repository hosts the project page for the KDD 2026 tutorial
+**Tutorial on Generative Recommendation: Foundations and Frontiers**.
 
-If you find Nerfies useful for your work please cite:
+- Conference: ACM SIGKDD 2026 (Jeju Island, Republic of Korea, August 09–13, 2026)
+- DOI: [10.1145/3770855.3816450](https://doi.org/10.1145/3770855.3816450)
+- Companion paper list: [Kuaishou-RecModel/Tri-Decoupled-GenRec](https://github.com/Kuaishou-RecModel/Tri-Decoupled-GenRec)
+
+## Local preview
+
+```bash
+python3 -m http.server 8000
+# then open http://localhost:8000
 ```
-@article{park2021nerfies
-  author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},
-  title     = {Nerfies: Deformable Neural Radiance Fields},
-  journal   = {ICCV},
-  year      = {2021},
+
+## Citing
+
+```bibtex
+@inproceedings{li2026genrec,
+  title     = {Tutorial on Generative Recommendation: Foundations and Frontiers},
+  author    = {Li, Xiaopeng and Wang, Yejing and Bao, Honghui and Chen, Bo and Cai, Kuo
+               and Zhang, Wenlin and Liu, Ziwei and Zhang, Sheng and Wang, Binhao
+               and Jia, Qinglin and Luo, Qiang and Tang, Ruiming and Zhao, Xiangyu},
+  booktitle = {Proceedings of the 32nd ACM SIGKDD Conference on Knowledge Discovery
+               and Data Mining (KDD '26)},
+  year      = {2026},
+  doi       = {10.1145/3770855.3816450}
 }
 ```
 
-# Website License
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+## License
+
+The website template is adapted from
+[LatentFusion](https://latentfusion.github.io/) and
+[Nerfies](https://nerfies.github.io/), licensed under
+[CC BY-SA 4.0](http://creativecommons.org/licenses/by-sa/4.0/).

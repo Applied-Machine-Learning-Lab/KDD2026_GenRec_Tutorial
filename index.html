@@ -1,487 +1,591 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="description"
-        content="Deformable Neural Radiance Fields creates free-viewpoint portraits (nerfies) from casually captured videos.">
-  <meta name="keywords" content="Nerfies, D-NeRF, NeRF">
+  <meta name="description" content="KDD 2026 Tutorial: Generative Recommendation — Foundations and Frontiers. A tri-decoupled perspective on tokenization, architecture, and optimization.">
+  <meta name="keywords" content="Generative Recommendation, KDD 2026, Tutorial, Tokenization, Semantic ID, LLM, Recommender Systems, Kuaishou, City University of Hong Kong">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nerfies: Deformable Neural Radiance Fields</title>
+  <title>Tutorial on Generative Recommendation: Foundations and Frontiers — KDD 2026</title>
 
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-
-    gtag('js', new Date());
-
-    gtag('config', 'G-PYVRSFMDRL');
-  </script>
-
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
-        rel="stylesheet">
-
-  <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
-  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,600,700|Playfair+Display:700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="icon" href="./static/images/favicon.svg">
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/bulma-carousel.min.js"></script>
-  <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js"></script>
+  <script defer src="./static/js/index.js"></script>
 </head>
 <body>
 
 <nav class="navbar" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+    <a class="navbar-item navbar-title" href="#top">
+      <strong>GenRec @ KDD&nbsp;2026</strong>
+    </a>
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="main-navbar">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
     </a>
   </div>
-  <div class="navbar-menu">
-    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
-      <a class="navbar-item" href="https://keunhong.com">
-      <span class="icon">
-          <i class="fas fa-home"></i>
-      </span>
-      </a>
 
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          More Research
-        </a>
-        <div class="navbar-dropdown">
-          <a class="navbar-item" href="https://hypernerf.github.io">
-            HyperNeRF
-          </a>
-          <a class="navbar-item" href="https://nerfies.github.io">
-            Nerfies
-          </a>
-          <a class="navbar-item" href="https://latentfusion.github.io">
-            LatentFusion
-          </a>
-          <a class="navbar-item" href="https://photoshape.github.io">
-            PhotoShape
-          </a>
-        </div>
-      </div>
+  <div id="main-navbar" class="navbar-menu">
+    <div class="navbar-end">
+      <a class="navbar-item" href="#abstract">Abstract</a>
+      <a class="navbar-item" href="#overview">Overview</a>
+      <a class="navbar-item" href="#audience">Audience</a>
+      <a class="navbar-item" href="#schedule">Schedule</a>
+      <a class="navbar-item" href="#survey">Survey</a>
+      <a class="navbar-item" href="#bibtex">BibTeX</a>
     </div>
-
   </div>
 </nav>
 
-
-<section class="hero">
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">Nerfies: Deformable Neural Radiance Fields</h1>
-          <div class="is-size-5 publication-authors">
-            <span class="author-block">
-              <a href="https://keunhong.com">Keunhong Park</a><sup>1</sup>,</span>
-            <span class="author-block">
-              <a href="https://utkarshsinha.com">Utkarsh Sinha</a><sup>2</sup>,</span>
-            <span class="author-block">
-              <a href="https://jonbarron.info">Jonathan T. Barron</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="http://sofienbouaziz.com">Sofien Bouaziz</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://www.danbgoldman.com">Dan B Goldman</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://homes.cs.washington.edu/~seitz/">Steven M. Seitz</a><sup>1,2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="http://www.ricardomartinbrualla.com">Ricardo Martin-Brualla</a><sup>2</sup>
-            </span>
-          </div>
-
-          <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>1</sup>University of Washington,</span>
-            <span class="author-block"><sup>2</sup>Google Research</span>
-          </div>
-
-          <div class="column has-text-centered">
-            <div class="publication-links">
-              <!-- PDF Link. -->
-              <span class="link-block">
-                <a href="https://arxiv.org/pdf/2011.12948"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fas fa-file-pdf"></i>
-                  </span>
-                  <span>Paper</span>
-                </a>
-              </span>
-              <span class="link-block">
-                <a href="https://arxiv.org/abs/2011.12948"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="ai ai-arxiv"></i>
-                  </span>
-                  <span>arXiv</span>
-                </a>
-              </span>
-              <!-- Video Link. -->
-              <span class="link-block">
-                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-youtube"></i>
-                  </span>
-                  <span>Video</span>
-                </a>
-              </span>
-              <!-- Code Link. -->
-              <span class="link-block">
-                <a href="https://github.com/google/nerfies"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-github"></i>
-                  </span>
-                  <span>Code</span>
-                  </a>
-              </span>
-              <!-- Dataset Link. -->
-              <span class="link-block">
-                <a href="https://github.com/google/nerfies/releases/tag/0.1"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="far fa-images"></i>
-                  </span>
-                  <span>Data</span>
-                  </a>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="hero teaser">
-  <div class="container is-max-desktop">
-    <div class="hero-body">
-      <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4"
-                type="video/mp4">
-      </video>
-      <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into
-        free-viewpoint
-        portraits.
-      </h2>
-    </div>
-  </div>
-</section>
-
-
-<section class="hero is-light is-small">
+<section id="top" class="hero publication-header">
   <div class="hero-body">
     <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-        <div class="item item-steve">
-          <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/steve.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-chair-tp">
-          <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/chair-tp.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-shiba">
-          <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/shiba.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-fullbody">
-          <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/fullbody.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-blueshirt">
-          <video poster="" id="blueshirt" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/blueshirt.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-mask">
-          <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/mask.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-coffee">
-          <video poster="" id="coffee" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/coffee.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-toby">
-          <video poster="" id="toby" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/toby2.mp4"
-                    type="video/mp4">
-          </video>
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <div class="is-size-6 publication-venue">KDD 2026 &nbsp;·&nbsp; Half-Day Tutorial &nbsp;·&nbsp; Jeju Island, Republic of Korea</div>
+
+          <h1 class="title is-1 publication-title">
+            Tutorial on Generative Recommendation:<br/>Foundations and Frontiers
+          </h1>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Xiaopeng Li<sup>1</sup>,</span>
+            <span class="author-block">Yejing Wang<sup>1</sup>,</span>
+            <span class="author-block">Honghui Bao<sup>2</sup>,</span>
+            <span class="author-block">Bo Chen<sup>2</sup>,</span>
+            <span class="author-block">Kuo Cai<sup>2</sup>,</span>
+            <span class="author-block">Wenlin Zhang<sup>1</sup>,</span>
+            <span class="author-block">Ziwei Liu<sup>1</sup>,</span>
+            <span class="author-block">Sheng Zhang<sup>1</sup>,</span>
+            <span class="author-block">Binhao Wang<sup>1</sup>,</span>
+            <span class="author-block">Qinglin Jia<sup>2</sup>,</span>
+            <span class="author-block">Qiang Luo<sup>2</sup>,</span>
+            <span class="author-block">Ruiming Tang<sup>2</sup>,</span>
+            <span class="author-block"><a href="https://zhaoxyai.github.io/">Xiangyu Zhao</a><sup>1</sup></span>
+          </div>
+
+          <div class="is-size-6 publication-affiliations">
+            <span><sup>1</sup> City University of Hong Kong</span>
+            &nbsp;·&nbsp;
+            <span><sup>2</sup> Kuaishou Technology</span>
+          </div>
+
+          <div class="publication-meta">
+            <span class="tag is-light"><i class="fas fa-calendar"></i>&nbsp; August 09–13, 2026</span>
+            <span class="tag is-light"><i class="fas fa-clock"></i>&nbsp; Half-Day (3 hours)</span>
+            <span class="tag is-light"><i class="fas fa-map-marker-alt"></i>&nbsp; Jeju Island, Korea</span>
+          </div>
+
+          <div class="publication-links">
+            <span class="link-block">
+              <a class="external-link button is-small is-rounded is-link"
+                 href="https://doi.org/10.1145/3770855.3816450">
+                <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                <span>Paper</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a class="external-link button is-small is-rounded is-link"
+                 href="https://www.preprints.org/manuscript/202512.0203">
+                <span class="icon"><i class="fas fa-book-open"></i></span>
+                <span>Survey</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a class="external-link button is-small is-rounded is-link"
+                 href="https://github.com/Kuaishou-RecModel/Tri-Decoupled-GenRec">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Paper&nbsp;List</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a class="external-link button is-small is-rounded is-link"
+                 href="#schedule">
+                <span class="icon"><i class="fas fa-list-check"></i></span>
+                <span>Schedule</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a class="external-link button is-small is-rounded is-link is-disabled"
+                 href="#">
+                <span class="icon"><i class="fas fa-display"></i></span>
+                <span>Slides&nbsp;(TBA)</span>
+              </a>
+            </span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-
-<section class="section">
-  <div class="container is-max-desktop">
-    <!-- Abstract. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Abstract</h2>
-        <div class="content has-text-justified">
+<section id="abstract" class="section">
+  <div class="container">
+    <div class="content">
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h2 class="title is-2">Abstract</h2>
           <p>
-            We present the first method capable of photorealistically reconstructing a non-rigidly
-            deforming scene using photos/videos captured casually from mobile phones.
+            In the current digital ecosystem, recommender systems serve as the core infrastructure for navigating large-scale
+            content catalogs and delivering personalized services, typically following multi-stage discriminative pipelines
+            (e.g., retrieval, ranking, and re-ranking). However, their fragmented architectures cause cascading cross-stage
+            error propagation and suboptimal hardware utilization. This motivates a paradigm shift toward
+            <strong>Generative Recommendation (GR)</strong>. GR mitigates these issues through end-to-end unified generative
+            modeling, optimizing for multi-dimensional preference objectives beyond local user behaviors.
           </p>
           <p>
-            Our approach augments neural radiance fields
-            (NeRF) by optimizing an
-            additional continuous volumetric deformation field that warps each observed point into a
-            canonical 5D NeRF.
-            We observe that these NeRF-like deformation fields are prone to local minima, and
-            propose a coarse-to-fine optimization method for coordinate-based models that allows for
-            more robust optimization.
-            By adapting principles from geometry processing and physical simulation to NeRF-like
-            models, we propose an elastic regularization of the deformation field that further
-            improves robustness.
-          </p>
-          <p>
-            We show that <span class="dnerf">Nerfies</span> can turn casually captured selfie
-            photos/videos into deformable NeRF
-            models that allow for photorealistic renderings of the subject from arbitrary
-            viewpoints, which we dub <i>"nerfies"</i>. We evaluate our method by collecting data
-            using a
-            rig with two mobile phones that take time-synchronized photos, yielding train/validation
-            images of the same pose at different viewpoints. We show that our method faithfully
-            reconstructs non-rigidly deforming scenes and reproduces unseen views with high
-            fidelity.
+            This tutorial comprehensively surveys recent generative recommendation advances through a
+            <strong>tri-decoupled perspective</strong> centered on <em>tokenization</em>, <em>architecture</em>, and
+            <em>optimization</em>—the three foundational components shaping these systems. Specifically, we summarize the
+            evolution of tokenization strategies, analyze the trade-offs of major generative architectures, and summarize
+            the transition from supervised next-token prediction to reinforcement-learning-based strategies. Connecting these
+            technical developments to practical deployment patterns and open challenges, we provide researchers and
+            practitioners a foundational reference and actionable blueprint for building next-generation generative
+            recommender systems.
           </p>
         </div>
       </div>
-    </div>
-    <!--/ Abstract. -->
 
-    <!-- Paper video. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Video</h2>
-        <div class="publication-video">
-          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"
-                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        </div>
-      </div>
-    </div>
-    <!--/ Paper video. -->
-  </div>
-</section>
-
-
-<section class="section">
-  <div class="container is-max-desktop">
-
-    <div class="columns is-centered">
-
-      <!-- Visual Effects. -->
-      <div class="column">
-        <div class="content">
-          <h2 class="title is-3">Visual Effects</h2>
-          <p>
-            Using <i>nerfies</i> you can create fun visual effects. This Dolly zoom effect
-            would be impossible without nerfies since it would require going through a wall.
-          </p>
-          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/dollyzoom-stacked.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <!--/ Visual Effects. -->
-
-      <!-- Matting. -->
-      <div class="column">
-        <h2 class="title is-3">Matting</h2>
-        <div class="columns is-centered">
-          <div class="column content">
-            <p>
-              As a byproduct of our method, we can also solve the matting problem by ignoring
-              samples that fall outside of a bounding box during rendering.
-            </p>
-            <video id="matting-video" controls playsinline height="100%">
-              <source src="./static/videos/matting.mp4"
-                      type="video/mp4">
-            </video>
-          </div>
-
-        </div>
-      </div>
-    </div>
-    <!--/ Matting. -->
-
-    <!-- Animation. -->
-    <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Animation</h2>
-
-        <!-- Interpolating. -->
-        <h3 class="title is-4">Interpolating states</h3>
-        <div class="content has-text-justified">
-          <p>
-            We can also animate the scene by interpolating the deformation latent codes of two input
-            frames. Use the slider here to linearly interpolate between the left frame and the right
-            frame.
+      <div id="overview" class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h2 class="title is-2">Framework Overview</h2>
+          <figure class="image figure-frame">
+            <img src="./static/images/framework.png" alt="Framework overview of discriminative and generative recommendation paradigms.">
+          </figure>
+          <p class="figure-caption">
+            <strong>Figure&nbsp;1.</strong> Framework overview of discriminative (left) and generative (right)
+            recommendation paradigms. Generative Recommendation unifies tokenization, architecture, and optimization into
+            an end-to-end pipeline that directly generates item identifiers.
           </p>
         </div>
-        <div class="columns is-vcentered interpolation-panel">
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_start.jpg"
-                 class="interpolation-image"
-                 alt="Interpolate start reference image."/>
-            <p>Start Frame</p>
-          </div>
-          <div class="column interpolation-video-column">
-            <div id="interpolation-image-wrapper">
-              Loading...
+      </div>
+
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h2 class="title is-2">What You Will Learn</h2>
+          <div class="columns is-multiline highlight-cards">
+            <div class="column is-half">
+              <div class="card-highlight">
+                <span class="icon-large"><i class="fas fa-route"></i></span>
+                <h3>Evolutionary Trajectory</h3>
+                <p>From discriminative recommendation to end-to-end generative modeling, and why this shift mitigates cascaded errors.</p>
+              </div>
             </div>
-            <input class="slider is-fullwidth is-large is-info"
-                   id="interpolation-slider"
-                   step="1" min="0" max="100" value="0" type="range">
+            <div class="column is-half">
+              <div class="card-highlight">
+                <span class="icon-large"><i class="fas fa-layer-group"></i></span>
+                <h3>Tri-Decoupled Perspective</h3>
+                <p>Three core dimensions: <em>Tokenization</em>, <em>Architecture</em>, and <em>Optimization</em>, each with its own evolving trends.</p>
+              </div>
+            </div>
+            <div class="column is-half">
+              <div class="card-highlight">
+                <span class="icon-large"><i class="fas fa-industry"></i></span>
+                <h3>Practical Deployments</h3>
+                <p>How GR systems are implemented across industrial stages (retrieval, ranking, end-to-end) and applications.</p>
+              </div>
+            </div>
+            <div class="column is-half">
+              <div class="card-highlight">
+                <span class="icon-large"><i class="fas fa-compass"></i></span>
+                <h3>Open Challenges</h3>
+                <p>Key bottlenecks and research questions, from efficiency and reasoning to interactive agents and pure content generation.</p>
+              </div>
+            </div>
           </div>
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_end.jpg"
-                 class="interpolation-image"
-                 alt="Interpolation end reference image."/>
-            <p class="is-bold">End Frame</p>
-          </div>
         </div>
-        <br/>
-        <!--/ Interpolating. -->
-
-        <!-- Re-rendering. -->
-        <h3 class="title is-4">Re-rendering the input video</h3>
-        <div class="content has-text-justified">
-          <p>
-            Using <span class="dnerf">Nerfies</span>, you can re-render a video from a novel
-            viewpoint such as a stabilized camera by playing back the training deformations.
-          </p>
-        </div>
-        <div class="content has-text-centered">
-          <video id="replay-video"
-                 controls
-                 muted
-                 preload
-                 playsinline
-                 width="75%">
-            <source src="./static/videos/replay.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <!--/ Re-rendering. -->
-
       </div>
     </div>
-    <!--/ Animation. -->
+  </div>
+</section>
 
+<section id="audience" class="section section-light">
+  <div class="container">
+    <div class="content">
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h2 class="title is-2">Target Audience &amp; Prerequisites</h2>
+          <p>
+            This tutorial is designed for researchers, practitioners, and students interested in modern recommender
+            systems, especially the transition from discriminative ranking pipelines to unified Generative Recommendation
+            (GR) frameworks. The material is organized progressively, making it accessible to advanced students while
+            still providing a systematic view of the design space of GR.
+          </p>
+          <div class="columns">
+            <div class="column">
+              <h3 class="title is-4"><i class="fas fa-check-circle"></i> Expected Background</h3>
+              <ul>
+                <li>Basic understanding of machine learning and recommender systems</li>
+                <li>Common concepts in sequence modeling</li>
+              </ul>
+            </div>
+            <div class="column">
+              <h3 class="title is-4"><i class="fas fa-star"></i> Helpful (but Not Required)</h3>
+              <ul>
+                <li>Familiarity with Transformer-based models</li>
+                <li>Item tokenization and semantic identifiers</li>
+                <li>Generative training objectives (next-token prediction, preference alignment)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Concurrent Work. -->
+<section id="schedule" class="section">
+  <div class="container">
+    <div class="content">
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h2 class="title is-2">Tutorial Schedule</h2>
+          <p>
+            The tutorial is presented as a <strong>half-day (3-hour) lecture</strong> with slides and handouts.
+            The full schedule is organized as follows:
+          </p>
+
+          <div class="schedule">
+            <!-- Item 1 -->
+            <div class="schedule-item">
+              <div class="schedule-time">
+                <span class="schedule-duration">20&nbsp;min</span>
+                <span class="schedule-slot">Session&nbsp;1</span>
+              </div>
+              <div class="schedule-detail">
+                <h3>Background and Preliminaries</h3>
+                <ul>
+                  <li>Discriminative Recommendation</li>
+                  <li>Generative Recommendation</li>
+                  <li>Organization of the Tutorial</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="schedule-item">
+              <div class="schedule-time">
+                <span class="schedule-duration">35&nbsp;min</span>
+                <span class="schedule-slot">Session&nbsp;2</span>
+              </div>
+              <div class="schedule-detail">
+                <h3>Tokenization Strategies</h3>
+                <ul>
+                  <li>Sparse ID-based Identifiers</li>
+                  <li>Text-based Identifiers</li>
+                  <li>Semantic ID (SID)-based Identifiers and Challenges</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="schedule-item">
+              <div class="schedule-time">
+                <span class="schedule-duration">40&nbsp;min</span>
+                <span class="schedule-slot">Session&nbsp;3</span>
+              </div>
+              <div class="schedule-detail">
+                <h3>Model Architecture</h3>
+                <ul>
+                  <li>Encoder-Decoder Architecture</li>
+                  <li>Decoder-Only Architecture</li>
+                  <li>Diffusion-Based Architecture</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Coffee break placeholder -->
+            <div class="schedule-item schedule-break">
+              <div class="schedule-time">
+                <span class="schedule-duration">—</span>
+                <span class="schedule-slot">Break</span>
+              </div>
+              <div class="schedule-detail">
+                <h3><i class="fas fa-mug-hot"></i>&nbsp; Coffee Break <span class="tba">(time TBA)</span></h3>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="schedule-item">
+              <div class="schedule-time">
+                <span class="schedule-duration">35&nbsp;min</span>
+                <span class="schedule-slot">Session&nbsp;4</span>
+              </div>
+              <div class="schedule-detail">
+                <h3>Optimization Strategies</h3>
+                <ul>
+                  <li>Supervised Learning (NTP &amp; NCE Modeling)</li>
+                  <li>Preference Alignment (DPO &amp; GRPO Modeling)</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="schedule-item">
+              <div class="schedule-time">
+                <span class="schedule-duration">25&nbsp;min</span>
+                <span class="schedule-slot">Session&nbsp;5</span>
+              </div>
+              <div class="schedule-detail">
+                <h3>Applications</h3>
+                <ul>
+                  <li>GR in Cascaded Systems (Retrieval, Ranking, End-to-End)</li>
+                  <li>Application Scenarios (Cold Start, Cross-Domain, Search, Auto-Bidding)</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Item 6 -->
+            <div class="schedule-item">
+              <div class="schedule-time">
+                <span class="schedule-duration">10&nbsp;min</span>
+                <span class="schedule-slot">Session&nbsp;6</span>
+              </div>
+              <div class="schedule-detail">
+                <h3>Challenges and Future Directions</h3>
+                <ul>
+                  <li>End-to-End Modeling and Efficiency</li>
+                  <li>Reasoning and Data Optimization</li>
+                  <li>Interactive Agents and the Shift to Pure Content Generation</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Item 7 -->
+            <div class="schedule-item">
+              <div class="schedule-time">
+                <span class="schedule-duration">15&nbsp;min</span>
+                <span class="schedule-slot">Session&nbsp;7</span>
+              </div>
+              <div class="schedule-detail">
+                <h3>Conclusion and Q&amp;A</h3>
+              </div>
+            </div>
+          </div>
+
+          <p class="tba-note">
+            <i class="fas fa-info-circle"></i>&nbsp;
+            Exact session date and start time will be announced once KDD&nbsp;2026 releases the official program.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
+  Presenters & Contributors section is temporarily hidden.
+  Uncomment when the presenter list is finalized.
+
+<section id="presenters" class="section section-light">
+  <div class="container">
+    <div class="content">
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h2 class="title is-2">Presenters</h2>
+          <p>The tutorial is jointly presented by researchers from City University of Hong Kong and Kuaishou Technology.</p>
+        </div>
+      </div>
+
+      <div class="columns is-centered is-multiline presenters">
+
+        <div class="column is-half">
+          <div class="presenter-card">
+            <h3>Xiaopeng Li <span class="tag is-info is-light">In-Person</span></h3>
+            <div class="presenter-affil">Ph.D. Candidate, City University of Hong Kong</div>
+            <p>Research on Recommendation, Information Retrieval, and Personalization RAG. 20+ papers in top venues
+              (TOIS, KDD, ACL, WWW, NeurIPS, CIKM) with 500+ citations. Best Student Team Award, KDD Cup 2024
+              (Multi-task Online Shopping Challenge for LLMs). Co-organized a WWW'25 tutorial on Joint Modeling in Recommendation.</p>
+          </div>
+        </div>
+
+        <div class="column is-half">
+          <div class="presenter-card">
+            <h3>Yejing Wang <span class="tag is-info is-light">In-Person</span></h3>
+            <div class="presenter-affil">Ph.D. Candidate, City University of Hong Kong</div>
+            <p>Focuses on industrially deployable discriminative and generative recommender systems. 20+ papers
+              (WWW, KDD, SIGIR, ICDM) with 600+ citations. Deployed scalable systems at Taobao and Xiaohongshu serving
+              hundreds of millions of users. Co-organizer of tutorials at KDD'25, WWW'25, WSDM'23, and WWW'22.</p>
+          </div>
+        </div>
+
+        <div class="column is-half">
+          <div class="presenter-card">
+            <h3>Honghui Bao <span class="tag is-info is-light">In-Person</span></h3>
+            <div class="presenter-affil">Kuaishou Technology</div>
+            <p>Specializes in Large Language Models, Generative Recommendation, and Heterogeneous User Modeling.
+              Led the globally recognized OpenOneRec project. Reviewer for SIGIR, KDD, RecSys, TOIS, and TORS. 200+ citations.</p>
+          </div>
+        </div>
+
+        <div class="column is-half">
+          <div class="presenter-card">
+            <h3>Bo Chen <span class="tag is-info is-light">In-Person</span></h3>
+            <div class="presenter-affil">Senior Researcher, Kuaishou Technology</div>
+            <p>Previously at Huawei Noah's Ark Lab; M.S. from Shanghai Jiao Tong University. Research on generative
+              recommendation, LLM-enhanced recommendation, and computational advertising. 70+ papers in top venues;
+              Best Paper Award at DLP-KDD 2021.</p>
+          </div>
+        </div>
+
+        <div class="column is-half">
+          <div class="presenter-card">
+            <h3>Kuo Cai <span class="tag is-info is-light">In-Person</span></h3>
+            <div class="presenter-affil">Senior Researcher, Kuaishou Technology</div>
+            <p>M.S. from Beijing University of Posts and Telecommunications. Primary contributor to Kuaishou's
+              OneRec, OneRec-V2, OneRec-Think, and OneMall projects. Publications at ACL, ICLR, WSDM, CIKM; 300+ citations.</p>
+          </div>
+        </div>
+
+        <div class="column is-half">
+          <div class="presenter-card">
+            <h3>Xiangyu Zhao <span class="tag is-info is-light">In-Person</span></h3>
+            <div class="presenter-affil">Associate Professor, City University of Hong Kong</div>
+            <p>Research on data mining and machine learning, particularly personalization, recommender systems,
+              online advertising, and search. 150+ papers in top venues. KDD 2025 Runner-Up Best Paper,
+              ICDM 2021/2022 Best-Ranked Papers, Global Top Chinese New Stars in AI. Organizer of multiple workshops
+              and tutorials at KDD, WWW, SIGIR, CIKM, RecSys.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h3 class="title is-3">Contributors</h3>
+          <div class="contributors">
+            <div class="contributor">
+              <strong>Wenlin Zhang</strong> — Ph.D. candidate, CityU. LLMs, Search Agents, Recommender Systems.
+            </div>
+            <div class="contributor">
+              <strong>Ziwei Liu</strong> — Ph.D. student, CityU. Information Retrieval and Recommendation.
+            </div>
+            <div class="contributor">
+              <strong>Sheng Zhang</strong> — Ph.D. student, CityU. Sequential recommendation and agent memory.
+            </div>
+            <div class="contributor">
+              <strong>Binhao Wang</strong> — Ph.D. student, CityU. Recommender Systems and LLM Agents.
+            </div>
+            <div class="contributor">
+              <strong>Qinglin Jia</strong> — Senior Researcher, Kuaishou. Previously at Huawei Noah's Ark Lab.
+            </div>
+            <div class="contributor">
+              <strong>Qiang Luo</strong> — Head of Short Video Recommendation Recall and Pre-ranking, Kuaishou.
+            </div>
+            <div class="contributor">
+              <strong>Ruiming Tang</strong> — Senior Director, Kuaishou; Head of Recommendation Ranking Model Center.
+              100+ papers with 13,000+ citations; AE of TOIS and TORS.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+-->
+
+<section id="survey" class="section">
+  <div class="container">
+    <div class="content">
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <h2 class="title is-2">Companion Survey</h2>
+          <p>
+            This tutorial is grounded in our companion survey, which provides a comprehensive review of generative
+            recommendation through a <strong>tri-decoupled</strong> perspective — covering the evolution of tokenization
+            strategies, generative architectures, optimization objectives, as well as practical deployment patterns and
+            open challenges.
+          </p>
+
+          <article class="survey-card">
+            <div class="survey-card-left">
+              <span class="survey-badge">Survey&nbsp;·&nbsp;2025</span>
+              <h3 class="survey-title">
+                A Survey of Generative Recommendation from a Tri-Decoupled Perspective:<br/>
+                Tokenization, Architecture, and Optimization
+              </h3>
+              <p class="survey-authors">
+                Xiaopeng Li, Bo Chen, Junda She, Shiteng Cao, You Wang, Qinglin Jia,
+                Haiying He, Zheli Zhou, Zhao Liu, Ji Liu, <em>et al.</em>
+              </p>
+              <p class="survey-desc">
+                We organize recent generative recommendation advances along three decoupled yet integrated axes —
+                <em>Tokenization</em>, <em>Architecture</em>, and <em>Optimization</em> — and connect them to
+                industrial deployment patterns and open research challenges.
+              </p>
+              <div class="survey-actions">
+                <a class="button is-small is-rounded is-link"
+                   href="https://www.preprints.org/manuscript/202512.0203">
+                  <span class="icon"><i class="fas fa-file-lines"></i></span>
+                  <span>Read on Preprints.org</span>
+                </a>
+                <a class="button is-small is-rounded is-link is-outlined"
+                   href="https://github.com/Kuaishou-RecModel/Tri-Decoupled-GenRec">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Paper&nbsp;List</span>
+                </a>
+              </div>
+            </div>
+            <div class="survey-card-right" aria-hidden="true">
+              <div class="survey-pill survey-pill-1">Tokenization</div>
+              <div class="survey-pill survey-pill-2">Architecture</div>
+              <div class="survey-pill survey-pill-3">Optimization</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="bibtex" class="section section-light">
+  <div class="container content">
     <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Related Links</h2>
-
-        <div class="content has-text-justified">
-          <p>
-            There's a lot of excellent work that was introduced around the same time as ours.
-          </p>
-          <p>
-            <a href="https://arxiv.org/abs/2104.09125">Progressive Encoding for Neural Optimization</a> introduces an idea similar to our windowed position encoding for coarse-to-fine optimization.
-          </p>
-          <p>
-            <a href="https://www.albertpumarola.com/research/D-NeRF/index.html">D-NeRF</a> and <a href="https://gvv.mpi-inf.mpg.de/projects/nonrigid_nerf/">NR-NeRF</a>
-            both use deformation fields to model non-rigid scenes.
-          </p>
-          <p>
-            Some works model videos with a NeRF by directly modulating the density, such as <a href="https://video-nerf.github.io/">Video-NeRF</a>, <a href="https://www.cs.cornell.edu/~zl548/NSFF/">NSFF</a>, and <a href="https://neural-3d-video.github.io/">DyNeRF</a>
-          </p>
-          <p>
-            There are probably many more by the time you are reading this. Check out <a href="https://dellaert.github.io/NeRF/">Frank Dellart's survey on recent NeRF papers</a>, and <a href="https://github.com/yenchenlin/awesome-NeRF">Yen-Chen Lin's curated list of NeRF papers</a>.
-          </p>
-        </div>
+      <div class="column is-two-thirds">
+        <h2 class="title is-2">Citing This Tutorial</h2>
+        <p>If you find this tutorial useful, please consider citing:</p>
+<pre><code class="lang-bibtex">@inproceedings{li2026genrec,
+  title     = {Tutorial on Generative Recommendation: Foundations and Frontiers},
+  author    = {Li, Xiaopeng and Wang, Yejing and Bao, Honghui and Chen, Bo and Cai, Kuo
+               and Zhang, Wenlin and Liu, Ziwei and Zhang, Sheng and Wang, Binhao
+               and Jia, Qinglin and Luo, Qiang and Tang, Ruiming and Zhao, Xiangyu},
+  booktitle = {Proceedings of the 32nd ACM SIGKDD Conference on Knowledge Discovery
+               and Data Mining (KDD '26)},
+  year      = {2026},
+  doi       = {10.1145/3770855.3816450}
+}</code></pre>
       </div>
     </div>
-    <!--/ Concurrent Work. -->
-
   </div>
 </section>
-
-
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop content">
-    <h2 class="title">BibTeX</h2>
-    <pre><code>@article{park2021nerfies,
-  author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},
-  title     = {Nerfies: Deformable Neural Radiance Fields},
-  journal   = {ICCV},
-  year      = {2021},
-}</code></pre>
-  </div>
-</section>
-
 
 <footer class="footer">
   <div class="container">
-    <div class="content has-text-centered">
-      <a class="icon-link"
-         href="./static/videos/nerfies_paper.pdf">
-        <i class="fas fa-file-pdf"></i>
-      </a>
-      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+    <div class="content has-text-centered footer-links">
+      <a class="external-link" href="https://github.com/Kuaishou-RecModel/Tri-Decoupled-GenRec" aria-label="GitHub">
         <i class="fab fa-github"></i>
       </a>
+      <a class="external-link" href="https://doi.org/10.1145/3770855.3816450" aria-label="Paper">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="external-link" href="mailto:xiaopli2-c@my.cityu.edu.hk" aria-label="Email">
+        <i class="fas fa-envelope"></i>
+      </a>
     </div>
-    <div class="columns is-centered">
-      <div class="column is-8">
-        <div class="content">
-          <p>
-            This website is licensed under a <a rel="license"
-                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
-            Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-          <p>
-            This means you are free to borrow the <a
-              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
-            we just ask that you link back to this page in the footer.
-            Please remember to remove the analytics code included in the header of the website which
-            you do not want on your website.
-          </p>
-        </div>
-      </div>
+    <div class="content has-text-centered footer-note">
+      <p>
+        &copy; 2026 The Authors. Website template adapted from
+        <a href="https://latentfusion.github.io/">LatentFusion</a> and
+        <a href="https://nerfies.github.io/">Nerfies</a>, licensed under
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+      </p>
     </div>
   </div>
 </footer>
